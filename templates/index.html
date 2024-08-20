@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-time Speech Recognition</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        #status {
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+        #output {
+            width: 80%;
+            height: 200px;
+            font-size: 1.2em;
+            padding: 10px;
+            border: 1px solid #ccc;
+            margin-bottom: 20px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>Real-time Speech Recognition</h1>
+    <p id="status">Status: Idle</p>
+    <p>Say <b>"terminate"</b> to end recording</p>
+    <p>Say <b>pause recording"</b> to pause recording</p>
+    <p>Say <b>"resume recording"</b> to resume recording</p>
+
+
+    <textarea id="output" placeholder="Speech will appear here..." readonly></textarea>
+    <button id="startButton">Start Recording</button>
+
+    <script>
+        const socket = io();
+        const startButton = document.getElementById('startButton');
+        const statusDisplay = document.getElementById('status');
+        const output = document.getElementById('output');
+
+        startButton.addEventListener('click', function() {
+            statusDisplay.innerText = 'Status: Listening...';
+            socket.emit('start_recording');
+        });
+
+        socket.on('update_status', function(data) {
+            statusDisplay.innerText = 'Status: ' + data.status;
+        });
+
+        socket.on('update_text', function(data) {
+            output.value += data.text + ' ';
+            output.scrollTop = output.scrollHeight;
+        });
+    </script>
+</body>
+</html>
